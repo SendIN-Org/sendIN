@@ -13,6 +13,7 @@ import {
 import { ref, set, get } from "firebase/database";
 import { Horizon } from '@stellar/stellar-sdk';
 import Link from 'next/link';
+import { Button } from "@/components/ui/button"
 
 export default function CreateWallet() {
   const [walletGenerated, setWalletGenerated] = useState(false);
@@ -150,46 +151,46 @@ export default function CreateWallet() {
         <>
           <h2 className="text-xl font-bold mt-4">Welcome, {user.displayName}</h2>
           <p className="mt-2">Email: {user.email}</p>
-          <button
+          <Button
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
             onClick={logout}
           >
             Logout
-          </button>
+          </Button>
         </>
       ) : (
-        <button
+        <Button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
           onClick={login}
         >
           Login with Google
-        </button>
+        </Button>
       )}
 
       {user && (
-        <button
+        <Button
           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 ml-4"
           onClick={generateWallet}
         >
           {walletGenerated ? "Wallet Exists" : "Generate Wallet"}
-        </button>
+        </Button>
       )}
 
       {user && walletGenerated && (
-        <button
+        <Button
           className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4 ml-4"
           onClick={fundWallet}
         >
           Fund Wallet
-        </button>
+        </Button>
       )}
 
       {user && walletGenerated && (
-        <button
+        <Button
           className="bg-blue-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4 ml-4"
         >
          <Link href="/transfer">Transfer</Link> 
-        </button>
+        </Button>
       )}
 
       {walletGenerated && (
