@@ -26,7 +26,7 @@ export default function Component() {
             </p>
             <Link
               href="#"
-              className="inline-flex mt-6 h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              className="inline-flex mt-6 h-10 items-center text-left justify-left rounded-md bg-primary px-8 py-6 text-lg font-bold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               prefetch={false}
             >
               Get Started
@@ -78,7 +78,7 @@ export default function Component() {
                   </div>
                 </div>
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition duration-200">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 rounded-md transition duration-200">
                 Send Money
               </Button>
             </div>
