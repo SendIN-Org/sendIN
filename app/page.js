@@ -22,6 +22,7 @@ export default function CreateWallet() {
   const [mnemonic, setMnemonic] = useState('');
   const [user, setUser] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -90,15 +91,18 @@ export default function CreateWallet() {
       const keypair = StellarSdk.Keypair.fromRawEd25519Seed(derivedKey.key);
       const publicKey = keypair.publicKey();
       const secretKey = keypair.secret();
+      const userEmailPut = user.email;
 
       setMnemonic(mnemonic);
       setPublicKey(publicKey);
       setSecretKey(secretKey);
       setWalletGenerated(true);
+      setUserEmail(userEmailPut);
 
       // Store wallet data in Realtime Database
       const walletRef = ref(database, `wallets/${user.uid}`);
       await set(walletRef, {
+        userEmail: userEmailPut,  // Use userEmailPut directly here
         mnemonic,
         publicKey,
         secretKey
