@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import { Horizon, Keypair, Networks, Operation, Asset, TransactionBuilder } from '@stellar/stellar-sdk';
-import { auth, database } from "../firebase"; // Ensure Firebase is correctly configured and imported
+import { auth, database } from "../utils/firebase"; // Ensure Firebase is correctly configured and imported
 import { ref, get } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 

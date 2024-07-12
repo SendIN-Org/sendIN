@@ -1,9 +1,32 @@
-
+'use client';
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { auth, database } from "../utils/firebase";
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import { useRouter } from 'next/navigation'
 
-export default function Component() {
+export default function Login() {
+
+  const googleAuth = new GoogleAuthProvider();
+  const router = useRouter()
+
+  const login = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleAuth);
+      console.log(result);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error logging in:', error);
+    }
+  }
+
+
   return (
     <div className="grid grid-cols-2 min-h-screen">
       <div className="flex items-center justify-center bg-background text-foreground">
@@ -26,9 +49,13 @@ export default function Component() {
             </Button>
           </form>
           <div className="text-center">
-            <Button variant="outline" className="w-full text-black">
+            <Button
+              variant="outline"
+              className="w-full text-black"
+              onClick={login}
+            >
               <ChromeIcon className="mr-2 h-4 w-4" />
-              Sign in with Google
+              Login with Google
             </Button>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import * as bip39 from 'bip39';
 import * as ed25519 from 'ed25519-hd-key';
-import { auth, database } from "./firebase";
+import { auth, database } from "./utils/firebase";
 import {
   signInWithPopup,
   signOut,
@@ -45,19 +45,19 @@ export default function CreateWallet() {
     }
   }
 
-  const logout = async () => {
-    try {
-      await signOut(auth);
-      console.log('User logged out successfully');
-      setWalletGenerated(false);
-      setPublicKey('');
-      setSecretKey('');
-      setMnemonic('');
-      setBalance(null);
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
+  // const logout = async () => {
+  //   try {
+  //     await signOut(auth);
+  //     console.log('User logged out successfully');
+  //     setWalletGenerated(false);
+  //     setPublicKey('');
+  //     setSecretKey('');
+  //     setMnemonic('');
+  //     setBalance(null);
+  //   } catch (error) {
+  //     console.error('Error logging out:', error);
+  //   }
+  // };
 
   const fetchWalletData = async (userId) => {
     try {

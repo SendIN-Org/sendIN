@@ -1,35 +1,48 @@
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+'use client'
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import useAuth from '../hooks/useAuth';
+import { useRouter } from "next/navigation";
 
-export default function Component() {
+export default function Dashboard() {
+  const { loading, authenticated } = useAuth();
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(null);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading indicator while checking authentication
+  }
+
+  if (!authenticated) {
+    return null; // Return null if the user is not authenticated (they will be redirected)
+  }
+  const transferRedirect = () => {
+    router.push('/transfer');
+  }
+
+  const fetchBalance = async (publicKey) => {
+    try {
+      const server = new Horizon.Server('https://horizon-testnet.stellar.org');
+      const account = await server.loadAccount(publicKey);
+      const balances = account.balances.map(balance => ({
+        asset: balance.asset_type === 'native' ? 'XLM' : balance.asset_code,
+        balance: balance.balance
+      }));
+      console.log(balances);
+      setBalance(balances);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    }
+  };
+
+
   return (
     <div className="flex flex-col h-screen">
-      <header className="bg-primary text-primary-foreground py-4 px-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">sendIN</h1>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" className="px-6 py-3 text-black   ">
-              Manage Account
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
-                  <img src="/placeholder.svg" width={36} height={36} alt="User" className="rounded-full text-black" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>John Doe</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
+   
       <main className="flex-1 bg-muted/40 p-6">
         <Card className="bg-background p-6">
           <div className="flex items-center justify-between">
@@ -38,8 +51,8 @@ export default function Component() {
               <p className="text-4xl font-bold">$5,432.00</p>
             </div>
             <div className="flex gap-4">
-              <Button className="px-6 py-5">Fund Account</Button>
-              <Button variant="outline" className="px-6 py-5">
+              <Button className="px-6 py-5" onClick={fetchBalance('GCT762A4YMCKODMSKH4HGL4UHCQAGXFVC2ARRMM2RHQZYZV74JYUY322')}>Fund Account</Button>
+              <Button variant="outline" className="px-6 py-5" onClick={transferRedirect}>
                 Transfer Money
               </Button>
             </div>
@@ -98,5 +111,5 @@ export default function Component() {
         </div>
       </main>
     </div>
-  )
+  );
 }
