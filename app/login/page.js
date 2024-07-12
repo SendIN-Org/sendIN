@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -10,22 +11,88 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 import { useRouter } from 'next/navigation'
+import { ref, get, set } from "firebase/database";
+import * as bip39 from 'bip39';
+import * as ed25519 from 'ed25519-hd-key';
+import * as StellarSdk from '@stellar/stellar-sdk';
 
 export default function Login() {
-
   const googleAuth = new GoogleAuthProvider();
-  const router = useRouter()
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const login = async () => {
     try {
       const result = await signInWithPopup(auth, googleAuth);
       console.log(result);
+      
+      // Check if the user already has a wallet
+      const walletExists = await checkWalletExists(result.user.uid);
+      
+      if (!walletExists) {
+        // If it's the first time, generate a wallet
+        await generateWallet(result.user);
+      } else {
+        // If not the first time, fetch and log wallet details
+        await fetchWalletData(result.user.uid);
+      }
+      
       router.push('/dashboard');
     } catch (error) {
       console.error('Error logging in:', error);
     }
   }
 
+  const checkWalletExists = async (userId) => {
+    const walletRef = ref(database, `wallets/${userId}`);
+    const snapshot = await get(walletRef);
+    return snapshot.exists();
+  }
+
+  const generateWallet = async (user) => {
+    try {
+      const mnemonic = bip39.generateMnemonic(128);
+      const seed = await bip39.mnemonicToSeed(mnemonic);
+      const derivationPath = "m/44'/148'/0'";
+      const derivedKey = ed25519.derivePath(derivationPath, seed.toString('hex'));
+      const keypair = StellarSdk.Keypair.fromRawEd25519Seed(derivedKey.key);
+      const publicKey = keypair.publicKey();
+      const secretKey = keypair.secret();
+
+      // Store wallet data in Realtime Database
+      const walletRef = ref(database, `wallets/${user.uid}`);
+      await set(walletRef, {
+        userEmail: user.email,
+        mnemonic,
+        publicKey,
+        secretKey
+      });
+
+      console.log('New wallet generated and stored for user:', user.email);
+    } catch (error) {
+      console.error('Error generating Stellar wallet:', error);
+    }
+  };
+
+  const fetchWalletData = async (userId) => {
+    try {
+      const walletRef = ref(database, `wallets/${userId}`);
+      const snapshot = await get(walletRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        console.log('Existing wallet details:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching wallet data:', error);
+    }
+  };
 
   return (
     <div className="grid grid-cols-2 min-h-screen">

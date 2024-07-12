@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { auth } from './utils/firebase';
 import { signOut, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -17,19 +19,14 @@ const Header = () => {
   }, []);
 
   const login = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      console.log('User logged in successfully');
-    } catch (error) {
-      console.error('Error logging in:', error);
-    }
+   router.push('/login');
   };
 
   const logout = async () => {
     try {
       await signOut(auth);
       console.log('User logged out successfully');
+      router.push('/home');
     } catch (error) {
       console.error('Error logging out:', error);
     }

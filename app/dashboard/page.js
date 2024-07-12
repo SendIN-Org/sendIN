@@ -7,7 +7,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import useAuth from '../hooks/useAuth';
 import { useRouter } from "next/navigation";
 import { Horizon } from "@stellar/stellar-sdk";
-import { ref, get } from "firebase/database";
+import { ref, get, query, orderByChild, equalTo, limitToLast } from "firebase/database";
 import { database } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
@@ -19,12 +19,16 @@ export default function Dashboard() {
   const [balance, setBalance] = useState(null);
   const [publicKey, setPublicKey] = useState('');
   const [xlmPriceUSD, setXlmPriceUSD] = useState(null);
+  const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         fetchWalletData(currentUser.uid);
+        fetchTransactions(currentUser.uid);
+      } else {
+        setTransactions([]);
       }
     });
 
@@ -77,6 +81,38 @@ export default function Dashboard() {
     router.push('/transfer');
   }
 
+  const fetchTransactions = async (userId) => {
+    const transactionsRef = ref(database, 'transactions');
+    const transactionsQuery = query(
+      transactionsRef,
+      orderByChild('sender'),
+      equalTo(userId),
+      limitToLast(10) // Limit to last 10 transactions, adjust as needed
+    );
+
+    try {
+      const snapshot = await get(transactionsQuery);
+      if (snapshot.exists()) {
+        const transactionsData = Object.entries(snapshot.val()).map(([key, value]) => ({
+          id: key,
+          ...value
+        }));
+        setTransactions(transactionsData.reverse()); // Reverse to show newest first
+      } else {
+        console.log('No transactions found for this user');
+        setTransactions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -86,6 +122,32 @@ export default function Dashboard() {
   }
 
   const xlmBalance = balance?.find(b => b.asset === 'XLM')?.balance || '0';
+
+  const fundWallet = async () => {
+    if (!publicKey) {
+      alert("Please generate a wallet first.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`
+      );
+      const responseJSON = await response.json();
+      if (response.status === 400) {
+        alert("You already funded your wallet before.");
+        return;
+      }
+      else {
+        console.log("SUCCESS! You have a new account :)\n", responseJSON);
+        alert("Wallet funded successfully!");
+      }
+      fetchBalance(publicKey);
+    } catch (error) {
+      console.error("ERROR!", error);
+      alert("Error funding wallet. Please try again.");
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -99,18 +161,34 @@ export default function Dashboard() {
                   ${(parseFloat(xlmBalance) * xlmPriceUSD).toFixed(2)} USD
                 </p>
               )}</p>
-              
+
             </div>
-            <div className="flex gap-4">
-              <Button className="px-6 py-5" onClick={() => fetchBalance('GCT762A4YMCKODMSKH4HGL4UHCQAGXFVC2ARRMM2RHQZYZV74JYUY322')}>Fund Account</Button>
-              <Button variant="outline" className="px-6 py-5" onClick={transferRedirect}>
+            <div className="flex gap-4 items-start">
+              <div className="flex flex-col items-center">
+                <Button
+                  className="px-6 py-5"
+                >
+                  Fund Account
+                </Button>
+                <button
+                  onClick={fundWallet}
+                  className="text-xs text-blue-500 mt-1 hover:underline focus:outline-none"
+                >
+                  or fund on testnet
+                </button>
+              </div>
+              <Button
+                variant="outline"
+                className="px-6 py-5"
+                onClick={transferRedirect}
+              >
                 Transfer Money
               </Button>
             </div>
           </div>
         </Card>
         <div className="mt-6">
-          <Card className="bg-background p-6">
+          <Card className="bg-background p-6 mt-6">
             <CardHeader>
               <CardTitle>Transaction History</CardTitle>
             </CardHeader>
@@ -125,36 +203,14 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>John Doe</TableCell>
-                    <TableCell>$100.00</TableCell>
-                    <TableCell>2023-04-15 10:30 AM</TableCell>
-                    <TableCell>Rent Payment</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Jane Smith</TableCell>
-                    <TableCell>$50.00</TableCell>
-                    <TableCell>2023-04-12 3:45 PM</TableCell>
-                    <TableCell>Groceries</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Bob Johnson</TableCell>
-                    <TableCell>$75.00</TableCell>
-                    <TableCell>2023-04-10 9:20 AM</TableCell>
-                    <TableCell>Utility Bill</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Sarah Lee</TableCell>
-                    <TableCell>$200.00</TableCell>
-                    <TableCell>2023-04-08 2:15 PM</TableCell>
-                    <TableCell>Car Payment</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Mike Brown</TableCell>
-                    <TableCell>$25.00</TableCell>
-                    <TableCell>2023-04-05 11:00 AM</TableCell>
-                    <TableCell>Subscription</TableCell>
-                  </TableRow>
+                  {transactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell>{transaction.recipient}</TableCell>
+                      <TableCell>{transaction.amount} USD</TableCell>
+                      <TableCell>{formatDate(transaction.timestamp)}</TableCell>
+                      <TableCell>{transaction.remark}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>

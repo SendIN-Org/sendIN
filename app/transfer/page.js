@@ -12,6 +12,10 @@ export default function Transfer() {
     const [status, setStatus] = useState('');
     const [secretKey, setSecretKey] = useState(null);
     const [remark, setRemark] = useState('');
+    const [amountUSD, setAmountUSD] = useState('');
+    const [amountXLM, setAmountXLM] = useState('');
+    const [exchangeRate, setExchangeRate] = useState(null);
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -23,6 +27,30 @@ export default function Transfer() {
         return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+        fetchExchangeRate();
+    }, []);
+
+    const fetchExchangeRate = async () => {
+        try {
+            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');
+            const data = await response.json();
+            setExchangeRate(data.stellar.usd);
+        } catch (error) {
+            console.error('Error fetching exchange rate:', error);
+        }
+    };
+
+    const handleUSDAmountChange = (e) => {
+        const usdAmount = e.target.value;
+        setAmountUSD(usdAmount);
+        if (exchangeRate && usdAmount !== '') {
+            const xlmAmount = (parseFloat(usdAmount) / exchangeRate).toFixed(7);
+            setAmountXLM(xlmAmount);
+        } else {
+            setAmountXLM('');
+        }
+    };
     const fetchWalletData = async (userId) => {
         try {
             const walletRef = ref(database, `wallets/${userId}`);
@@ -70,6 +98,11 @@ export default function Transfer() {
             return;
         }
 
+        if (!amountXLM || isNaN(parseFloat(amountXLM)) || parseFloat(amountXLM) <= 0) {
+            setStatus('Invalid amount. Please enter a valid USD amount.');
+            return;
+        }
+
         const destinationPublicKey = await fetchDestinationPublicKey(destinationEmail);
         console.log(destinationPublicKey)
         if (!destinationPublicKey) {
@@ -90,7 +123,7 @@ export default function Transfer() {
                 .addOperation(Operation.payment({
                     destination: destinationPublicKey,
                     asset: Asset.native(),
-                    amount: amount.toString()
+                    amount: amountXLM.toString()
                 }))
                 .setTimeout(180)
                 .build();
@@ -101,7 +134,7 @@ export default function Transfer() {
             console.log(transactionResult);
             await uploadTransactionData(destinationEmail, amount, remark);
             setStatus('Transfer successful and data uploaded to Firebase');
-            
+
         } catch (error) {
             console.error('Error:', error);
             setStatus('Transfer failed. Please try again.');
@@ -112,8 +145,9 @@ export default function Transfer() {
         try {
             const transactionsRef = ref(database, 'transactions');
             await push(transactionsRef, {
+                sender: auth.currentUser.uid,  // Add this line
                 recipient: recipient,
-                amount: amount,
+                amount: amountUSD,
                 remark: remark,
                 timestamp: serverTimestamp()
             });
@@ -125,45 +159,45 @@ export default function Transfer() {
 
     return (
         <div className="max-w-md mx-auto mt-10">
-          <h1 className="text-2xl font-bold text-center mb-6">Transfer</h1>
-          <form onSubmit={handleTransfer} className="space-y-4">
-            <div>
-              <label htmlFor="amount" className="block mb-1">Amount (XLM)</label>
-              <input
-                type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block mb-1">Recipient Email</label>
-              <input
-                type="email"
-                id="email"
-                value={destinationEmail}
-                onChange={(e) => setDestinationEmail(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="remark" className="block mb-1">Remark</label>
-              <input
-                type="text"
-                id="remark"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
-              />
-            </div>
-            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
-              Transfer
-            </button>
-          </form>
-          {status && <p className="mt-4 text-center">{status}</p>}
+            <h1 className="text-2xl font-bold text-center mb-6">Transfer</h1>
+            <form onSubmit={handleTransfer} className="space-y-4">
+                <div>
+                    <label htmlFor="amount" className="block mb-1">Amount (USD)</label>
+                    <input
+                        type="number"
+                        id="amount"
+                        value={amountUSD}
+                        onChange={handleUSDAmountChange}
+                        className="w-full px-3 py-2 border rounded"
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="email" className="block mb-1">Recipient Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={destinationEmail}
+                        onChange={(e) => setDestinationEmail(e.target.value)}
+                        className="w-full px-3 py-2 border rounded"
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="remark" className="block mb-1">Remark</label>
+                    <input
+                        type="text"
+                        id="remark"
+                        value={remark}
+                        onChange={(e) => setRemark(e.target.value)}
+                        className="w-full px-3 py-2 border rounded"
+                    />
+                </div>
+                <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                    Transfer
+                </button>
+            </form>
+            {status && <p className="mt-4 text-center">{status}</p>}
         </div>
-      );
-    }
+    );
+}

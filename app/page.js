@@ -37,14 +37,14 @@ export default function CreateWallet() {
 
   const googleAuth = new GoogleAuthProvider();
   
-  const login = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleAuth);
-      console.log(result);
-    } catch (error) {
-      console.error('Error logging in:', error);
-    }
-  }
+  // const login = async () => {
+  //   try {
+  //     const result = await signInWithPopup(auth, googleAuth);
+  //     console.log(result);
+  //   } catch (error) {
+  //     console.error('Error logging in:', error);
+  //   }
+  // }
 
   // const logout = async () => {
   //   try {
@@ -66,11 +66,7 @@ export default function CreateWallet() {
       const snapshot = await get(walletRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        setPublicKey(data.publicKey);
-        setSecretKey(data.secretKey);
-        setMnemonic(data.mnemonic);
-        setWalletGenerated(true);
-        fetchBalance(data.publicKey);
+        console.log(data);
       }
     } catch (error) {
       console.error('Error fetching wallet data:', error);
@@ -115,19 +111,19 @@ export default function CreateWallet() {
     }
   };
 
-  const fetchBalance = async (publicKey) => {
-    try {
-      const server = new Horizon.Server('https://horizon-testnet.stellar.org');
-      const account = await server.loadAccount(publicKey);
-      const balances = account.balances.map(balance => ({
-        asset: balance.asset_type === 'native' ? 'XLM' : balance.asset_code,
-        balance: balance.balance
-      }));
-      setBalance(balances);
-    } catch (error) {
-      console.error('Error fetching balance:', error);
-    }
-  };
+  // const fetchBalance = async (publicKey) => {
+  //   try {
+  //     const server = new Horizon.Server('https://horizon-testnet.stellar.org');
+  //     const account = await server.loadAccount(publicKey);
+  //     const balances = account.balances.map(balance => ({
+  //       asset: balance.asset_type === 'native' ? 'XLM' : balance.asset_code,
+  //       balance: balance.balance
+  //     }));
+  //     setBalance(balances);
+  //   } catch (error) {
+  //     console.error('Error fetching balance:', error);
+  //   }
+  // };
 
   const fundWallet = async () => {
     if (!publicKey) {
@@ -151,25 +147,6 @@ export default function CreateWallet() {
 
   return (
     <div className="text-center">
-      {user ? (
-        <>
-          <h2 className="text-xl font-bold mt-4">Welcome, {user.displayName}</h2>
-          <p className="mt-2">Email: {user.email}</p>
-          <Button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-           // onClick={logout}
-          >
-            Logout
-          </Button>
-        </>
-      ) : (
-        <Button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          onClick={login}
-        >
-          Login with Google
-        </Button>
-      )}
 
       {user && (
         <Button
