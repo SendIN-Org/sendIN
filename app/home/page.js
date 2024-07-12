@@ -1,79 +1,89 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
-export default function Home() {
-    const [isSellBuy, setIsSellBuy] = useState(true)
-  const handleSwapSellBuy = () => {
-    setIsSellBuy(!isSellBuy)
-  }
+export default function Component() {
+  const [transferAmountA, setTransferAmountA] = useState(250)
+  const [transferAmountB, setTransferAmountB] = useState(15000)
+
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-24">
-      <div className="flex flex-col items-start space-y-4 md:w-1/2">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">sendIN</h1>
-        <p className="text-muted-foreground md:text-xl">The easiest way to send and receive money securely.</p>
-        <div className="flex items-center space-x-4">
-          <Button>Get Started</Button>
-          <Link href="#" className="text-primary hover:underline" prefetch={false}>
-            Learn More
-          </Link>
+    <div className="flex w-full items-center justify-between px-4 md:px-6">
+      <div className="w-1/2 pr-8 flex items-center justify-center">
+        <div className="flex flex-col items-center text-center">
+        <div className="max-w-2xl">
+  <h1 className="text-6xl font-bold tracking-tight mb-6 leading-tight text-gray-800 text-left">
+    Effortlessly send <br />
+    money from the <br />
+    <span className="text-blue-600">US to India</span><br />
+    in <span className="border-b-2 border-blue-500">minutes</span>.
+  </h1>
+</div>
+
+          <p className="text-gray-600 text-xl leading-relaxed mt-4 max-w-xl">
+            Fast, secure, and seamless with 
+            <span className="font-semibold text-blue-600"> sendIN</span> on Stellar.
+          </p>
         </div>
       </div>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black">
-      <div className="flex flex-col items-center justify-center w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-        <div className="w-full p-4 bg-gray-200 rounded-lg">
-          <div className="flex justify-between mb-4">
-            <span>{isSellBuy ? "Sell" : "Buy"}</span>
-            <div className="flex items-center space-x-2">
-              <span>0</span>
-              <Select>
-                <SelectTrigger id={isSellBuy ? "sell-token" : "buy-token"} className="flex items-center space-x-1">
-                  <EclipseIcon className="w-4 h-4" />
-                  <SelectValue placeholder={isSellBuy ? "ETH" : "Select token"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="eth">ETH</SelectItem>
-                  <SelectItem value="btc">BTC</SelectItem>
-                </SelectContent>
-              </Select>
+      <div className="w-1/2 flex items-center justify-center my-20">
+        <div className="w-full max-w-md rounded-xl border bg-card p-8 shadow-lg">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-medium mb-2">Transfer</h3>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  value={transferAmountA}
+                  onChange={(e) => setTransferAmountA(Number(e.target.value))}
+                  className="w-full pl-8 pr-3 py-2 text-2xl font-bold rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-center mb-4" onClick={handleSwapSellBuy}>
-            <ArrowDownIcon className="w-4 h-4 cursor-pointer" />
-          </div>
-          <div className="flex justify-between mb-4">
-            <span>{isSellBuy ? "Buy" : "Sell"}</span>
-            <div className="flex items-center space-x-2">
-              <span>0</span>
-              <Select>
-                <SelectTrigger
-                  id={isSellBuy ? "buy-token" : "sell-token"}
-                  className="flex items-center space-x-1 bg-black text-white rounded-full px-2 py-1"
-                >
-                  <SelectValue placeholder={isSellBuy ? "Select token" : "ETH"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="eth">ETH</SelectItem>
-                  <SelectItem value="btc">BTC</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <h3 className="text-xl font-medium mb-2">Receive</h3>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+                <input
+                  type="number"
+                  value={transferAmountB}
+                  onChange={(e) => setTransferAmountB(Number(e.target.value))}
+                  className="w-full pl-8 pr-3 py-2 text-2xl font-bold rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0"
+                />
+              </div>
             </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <CheckIcon className="h-6 w-6 text-green-500 flex-shrink-0" />
+                <div>
+                  <h4 className="text-lg font-medium">Fast and Secure</h4>
+                  <p className="text-gray-600">&lt; 10 minutes</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckIcon className="h-6 w-6 text-green-500 flex-shrink-0" />
+                <div>
+                  <h4 className="text-lg font-medium">Low Fees</h4>
+                  <p className="text-gray-600">Only 0.5%</p>
+                </div>
+              </div>
+            </div>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition duration-200">
+              Send Money
+            </Button>
           </div>
-          <Button className="w-full bg-black text-white">Connect wallet</Button>
         </div>
       </div>
-    </div>
     </div>
   )
 }
 
-function ArrowDownIcon(props) {
+// ... (rest of the code remains unchanged)
+
+
+function CheckIcon(props) {
   return (
     <svg
       {...props}
@@ -87,14 +97,13 @@ function ArrowDownIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M12 5v14" />
-      <path d="m19 12-7 7-7-7" />
+      <path d="M20 6 9 17l-5-5" />
     </svg>
   )
 }
 
 
-function EclipseIcon(props) {
+function ChevronDownIcon(props) {
   return (
     <svg
       {...props}
@@ -108,8 +117,27 @@ function EclipseIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 2a7 7 0 1 0 10 10" />
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+
+function ChevronUpIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m18 15-6-6-6 6" />
     </svg>
   )
 }
