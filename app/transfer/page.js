@@ -147,7 +147,7 @@ export default function Transfer() {
             const transactionResult = await server.submitTransaction(transaction);
             console.log(transactionResult);
             await uploadTransactionData(destinationEmail, amount, remark);
-            setStatus('Transfer was successful');
+            setStatus('Transfer was successful!');
 
         } catch (error) {
             console.error('Error:', error);
@@ -172,47 +172,56 @@ export default function Transfer() {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10">
-            <h1 className="text-2xl font-bold text-center mb-6">Transfer</h1>
-            <form onSubmit={handleTransfer} className="space-y-4">
-                <div>
-                    <label htmlFor="amount" className="block mb-1">Amount (USD)</label>
-                    <input
-                        type="number"
-                        id="amount"
-                        value={amountUSD}
-                        onChange={handleUSDAmountChange}
-                        className="w-full px-3 py-2 border rounded"
-                        required
-                    />
+        <div className="w-full flex items-center justify-center my-20">
+          <div className="w-full max-w-md rounded-3xl border bg-white p-8 shadow-lg">
+            <h1 className="text-2xl font-bold text-center mb-6">Transfer Money</h1>
+            <form onSubmit={handleTransfer} className="space-y-6">
+              <div>
+                <h3 className="text-base font-medium mb-2">Amount (USD)</h3>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    id="amount"
+                    value={amountUSD}
+                    onChange={handleUSDAmountChange}
+                    className="w-full pl-8 pr-3 py-4 text-xl font-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
                 </div>
-                
-                <div>
-                    <label htmlFor="email" className="block mb-1">Recipient Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={destinationEmail}
-                        onChange={(e) => setDestinationEmail(e.target.value)}
-                        className="w-full px-3 py-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="remark" className="block mb-1">Remark</label>
-                    <input
-                        type="text"
-                        id="remark"
-                        value={remark}
-                        onChange={(e) => setRemark(e.target.value)}
-                        className="w-full px-3 py-2 border rounded"
-                    />
-                </div>
-                <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
-                    Transfer
-                </button>
+              </div>
+              <div>
+                <h3 className="text-base font-medium mb-2">Recipient Email</h3>
+                <input
+                  type="email"
+                  id="email"
+                  value={destinationEmail}
+                  onChange={(e) => setDestinationEmail(e.target.value)}
+                  className="w-full px-3 py-4 text-xl font-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <h3 className="text-base font-medium mb-2">Remark</h3>
+                <input
+                  type="text"
+                  id="remark"
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                  className="w-full px-3 py-4 text-xl font-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-6 rounded-3xl transition duration-200"
+              >
+                Transfer
+              </button>
             </form>
             {status && <p className="mt-4 text-center">{status}</p>}
+          </div>
         </div>
-    );
-}
+      );
+    }
