@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { auth } from './utils/firebase';
 import { signOut, signInWithPopup, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -19,7 +20,7 @@ const Header = () => {
   }, []);
 
   const login = async () => {
-   router.push('/login');
+    router.push('/login');
   };
 
   const logout = async () => {
@@ -35,6 +36,7 @@ const Header = () => {
   return (
     <header className="bg-primary text-primary-foreground py-4 px-6">
       <div className="flex items-center justify-between">
+        <img src="https://cdn.discordapp.com/attachments/1185000784941817937/1261664346463932416/Stellar_Logo_1.png?ex=6693c7fc&is=6692767c&hm=4ff992341c1fa75e3d2938f5cd4064b2db63a3939637b73b0879a32f6be0bd18&" alt="sendIN" className="w-12 h-12" />
         <h1 className="text-2xl font-bold">sendIN</h1>
         <div className="flex items-center gap-4">
           {!user ? (
@@ -70,3 +72,4 @@ const Header = () => {
 };
 
 export default Header;
+

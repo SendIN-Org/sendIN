@@ -2,7 +2,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link';
-import backimg from './back.png'
 
 export default function Component() {
   const [transferAmountA, setTransferAmountA] = useState(250);
