@@ -19,6 +19,18 @@ export default function Transfer() {
     const [exchangeRate, setExchangeRate] = useState(null);
     const { loading, authenticated } = useAuth();
 
+    const fetchWalletData = async (userId) => {
+        try {
+            const walletRef = ref(database, `wallets/${userId}`);
+            const snapshot = await get(walletRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                setSecretKey(data.secretKey);
+            }
+        } catch (error) {
+            console.error('Error fetching wallet data:', error);
+        }
+    };
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser) {
@@ -64,18 +76,7 @@ export default function Transfer() {
             setAmountXLM('');
         }
     };
-    const fetchWalletData = async (userId) => {
-        try {
-            const walletRef = ref(database, `wallets/${userId}`);
-            const snapshot = await get(walletRef);
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                setSecretKey(data.secretKey);
-            }
-        } catch (error) {
-            console.error('Error fetching wallet data:', error);
-        }
-    };
+   
 
     const fetchDestinationPublicKey = async (email) => {
         try {
@@ -146,7 +147,7 @@ export default function Transfer() {
             const transactionResult = await server.submitTransaction(transaction);
             console.log(transactionResult);
             await uploadTransactionData(destinationEmail, amount, remark);
-            setStatus('Transfer successful and data uploaded to Firebase');
+            setStatus('Transfer was successful');
 
         } catch (error) {
             console.error('Error:', error);
@@ -185,6 +186,7 @@ export default function Transfer() {
                         required
                     />
                 </div>
+                
                 <div>
                     <label htmlFor="email" className="block mb-1">Recipient Email</label>
                     <input

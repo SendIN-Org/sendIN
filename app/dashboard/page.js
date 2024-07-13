@@ -43,6 +43,7 @@ export default function Dashboard() {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');
       const data = await response.json();
       setXlmPriceUSD(data.stellar.usd);
+      console.log('XLM price:', data.stellar.usd);
     } catch (error) {
       console.error('Error fetching XLM price:', error);
     }
@@ -136,7 +137,7 @@ export default function Dashboard() {
       );
       const responseJSON = await response.json();
       if (response.status === 400) {
-        alert("You already funded your wallet before.");
+        // alert("You already funded your wallet before.");
         return;
       }
       else {
@@ -166,20 +167,23 @@ export default function Dashboard() {
             </div>
             <div className="flex gap-4 items-start">
               <div className="flex flex-col items-center">
+                <Link href="/fund">
                 <Button
                   className="px-6 py-5"
+                  variant="outline"
+                  onClick={fundWallet}
                 >
-                  <Link href='/fund'>
-                  Fund Account
-                  </Link>
+                  Add Money
                 </Button>
-                <button
+                </Link>
+                {/* <button
                   onClick={fundWallet}
                   className="text-xs text-blue-500 mt-1 hover:underline focus:outline-none"
                 >
                   or fund on testnet
-                </button>
+                </button> */}
               </div>
+              
               <Button
                 variant="outline"
                 className="px-6 py-5"
@@ -187,6 +191,14 @@ export default function Dashboard() {
               >
                 Transfer Money
               </Button>
+              <Link href="/withdraw">
+              <Button
+                  className="px-6 py-5"
+                  variant="outline"
+                >
+                  Withdraw Money
+                </Button>
+                </Link>
             </div>
           </div>
         </Card>
