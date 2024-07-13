@@ -11,6 +11,7 @@ import { ref, get, query, orderByChild, equalTo, limitToLast } from "firebase/da
 import { database } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
+import Link from "next/link";
 
 export default function Dashboard() {
   const { loading, authenticated } = useAuth();
@@ -168,7 +169,9 @@ export default function Dashboard() {
                 <Button
                   className="px-6 py-5"
                 >
+                  <Link href='/fund'>
                   Fund Account
+                  </Link>
                 </Button>
                 <button
                   onClick={fundWallet}

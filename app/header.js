@@ -27,7 +27,7 @@ const Header = () => {
     try {
       await signOut(auth);
       console.log('User logged out successfully');
-      router.push('/home');
+      router.push('/');
     } catch (error) {
       console.error('Error logging out:', error);
     }

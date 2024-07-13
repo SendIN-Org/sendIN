@@ -67,3 +67,18 @@
       @apply bg-background text-foreground;
     }
   }
+
+  @keyframes blink {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  .typewriter-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background-color: currentColor;
+    margin-left: 2px;
+    animation: blink 0.7s infinite;
+  }

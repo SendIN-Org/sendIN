@@ -5,6 +5,8 @@ import { Horizon, Keypair, Networks, Operation, Asset, TransactionBuilder } from
 import { auth, database } from "../utils/firebase";
 import { ref, get, push, serverTimestamp } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import useAuth from '../hooks/useAuth';
+
 
 export default function Transfer() {
     const [amount, setAmount] = useState('');
@@ -15,7 +17,7 @@ export default function Transfer() {
     const [amountUSD, setAmountUSD] = useState('');
     const [amountXLM, setAmountXLM] = useState('');
     const [exchangeRate, setExchangeRate] = useState(null);
-
+    const { loading, authenticated } = useAuth();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -25,10 +27,6 @@ export default function Transfer() {
         });
 
         return () => unsubscribe();
-    }, []);
-
-    useEffect(() => {
-        fetchExchangeRate();
     }, []);
 
     const fetchExchangeRate = async () => {
@@ -41,6 +39,21 @@ export default function Transfer() {
         }
     };
 
+    
+    useEffect(() => {
+        fetchExchangeRate();
+    }, []);
+
+
+    if (loading) {
+        return <div>Loading...</div>;
+      }
+    
+      if (!authenticated) {
+        return null;
+      }
+
+    
     const handleUSDAmountChange = (e) => {
         const usdAmount = e.target.value;
         setAmountUSD(usdAmount);
