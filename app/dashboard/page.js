@@ -32,6 +32,7 @@ export default function Dashboard() {
         fetchWalletData(user.uid);
         const fetchedReceivals = await fetchReceivals(user.email);
         setReceivals(fetchedReceivals);
+        fetchXLMPrice();
       } else {
         setTransactions([]);
         setReceivals([]);
