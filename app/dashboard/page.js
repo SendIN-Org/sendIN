@@ -249,7 +249,7 @@ export default function Dashboard() {
         <div className="mt-6">
           <Card className="bg-background p-6 mt-6">
             <CardHeader className="flex flex-row justify-between items-center">
-              <CardTitle className="text-xl font-semibold">Tranfe History</CardTitle>
+              <CardTitle className="text-xl font-semibold">Transfer History</CardTitle>
               <Button
                 onClick={() => setShowReceivals(!showReceivals)}
                 className=""
