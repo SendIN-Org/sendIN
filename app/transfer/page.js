@@ -10,6 +10,7 @@ import useAuth from '../hooks/useAuth';
 
 export default function Transfer() {
     const [amount, setAmount] = useState('');
+    const [emailUser, setEmailUser] = useState('');
     const [destinationEmail, setDestinationEmail] = useState('');
     const [status, setStatus] = useState('');
     const [secretKey, setSecretKey] = useState(null);
@@ -34,6 +35,7 @@ export default function Transfer() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser) {
+                setEmailUser(currentUser.email)
                 fetchWalletData(currentUser.uid);
             }
         });
@@ -160,6 +162,7 @@ export default function Transfer() {
             const transactionsRef = ref(database, 'transactions');
             await push(transactionsRef, {
                 sender: auth.currentUser.uid,  // Add this line
+                sendermail: auth.currentUser.email,
                 recipient: recipient,
                 amount: amountUSD,
                 remark: remark,

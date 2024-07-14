@@ -150,7 +150,7 @@ export default function Component() {
             {/* Spacer to ensure the second section appears after scrolling */}
             <div className="h-32 bg-white"></div>
 
-            <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+            {/* <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
                 <div className="container px-4 md:px-6">
                     <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
                         <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -182,7 +182,7 @@ export default function Component() {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> */}
         </div>
     );
 }

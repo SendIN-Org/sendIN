@@ -61,7 +61,7 @@ const Header = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{user.displayName || "User"}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
+              <Link href="/profile"> <DropdownMenuItem>Profile</DropdownMenuItem></Link> 
                 <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>

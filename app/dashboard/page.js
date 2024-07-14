@@ -7,7 +7,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import useAuth from '../hooks/useAuth';
 import { useRouter } from "next/navigation";
 import { Horizon } from "@stellar/stellar-sdk";
-import { ref, get, query, orderByChild, equalTo, limitToLast } from "firebase/database";
+import { ref, get, query, orderByChild, equalTo, limitToLast, set } from "firebase/database";
 import { database } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
@@ -21,23 +21,35 @@ export default function Dashboard() {
   const [publicKey, setPublicKey] = useState('');
   const [xlmPriceUSD, setXlmPriceUSD] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [showReceivals, setShowReceivals] = useState(false);
+  const [receivals, setReceivals] = useState([]);
+  const [loggedEmail, setLoggedEmail] = useState('');
 
   useEffect(() => {
+    const fetchData = async (user) => {
+      if (user) {
+        fetchTransactions(user.uid);
+        fetchWalletData(user.uid);
+        const fetchedReceivals = await fetchReceivals(user.email);
+        setReceivals(fetchedReceivals);
+      } else {
+        setTransactions([]);
+        setReceivals([]);
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        fetchWalletData(currentUser.uid);
-        fetchTransactions(currentUser.uid);
+        fetchData(currentUser);
       } else {
         setTransactions([]);
+        setReceivals([]);
       }
     });
 
-    fetchXLMPrice();
-
     return () => unsubscribe();
   }, []);
-
   const fetchXLMPrice = async () => {
     try {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');
@@ -54,6 +66,7 @@ export default function Dashboard() {
       const snapshot = await get(ref(database, `wallets/${userId}`));
       if (snapshot.exists()) {
         const data = snapshot.val();
+        console.log('Wallet data:', data);
         setPublicKey(data.publicKey);
         fetchBalance(data.publicKey);
       } else {
@@ -109,6 +122,34 @@ export default function Dashboard() {
     }
   };
 
+  const fetchReceivals = async (loggedEmail) => {
+    const transactionsRef = ref(database, 'transactions');
+    const transactionsQuery = query(
+      transactionsRef,
+      orderByChild('recipient'),
+      equalTo(loggedEmail),
+      limitToLast(10) // Limit to last 10 receivals, adjust as needed
+    );
+
+    try {
+      const snapshot = await get(transactionsQuery);
+      if (snapshot.exists()) {
+        const receivalsData = Object.entries(snapshot.val()).map(([key, value]) => ({
+          id: key,
+          ...value
+        }));
+        console.log('Receivals:', receivalsData)
+        return receivalsData.reverse(); // Reverse to show newest first
+      } else {
+        console.log('No receivals found for this user');
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching receivals:", error);
+      return [];
+    }
+  };
+
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -126,8 +167,10 @@ export default function Dashboard() {
   const xlmBalance = balance?.find(b => b.asset === 'XLM')?.balance || '0';
 
   const fundWallet = async () => {
+    console.log('Funding wallet...');
+    console.log(publicKey)
     if (!publicKey) {
-      alert("Please generate a wallet first.");
+      console.log("Please generate a wallet first.");
       return;
     }
 
@@ -137,17 +180,17 @@ export default function Dashboard() {
       );
       const responseJSON = await response.json();
       if (response.status === 400) {
-        // alert("You already funded your wallet before.");
+        console.log("You already funded your wallet before.");
         return;
       }
       else {
         console.log("SUCCESS! You have a new account :)\n", responseJSON);
-        alert("Wallet funded successfully!");
+        // alert("Wallet funded successfully!");
       }
       fetchBalance(publicKey);
     } catch (error) {
       console.error("ERROR!", error);
-      alert("Error funding wallet. Please try again.");
+      // alert("Error funding wallet. Please try again.");
     }
   };
 
@@ -168,13 +211,13 @@ export default function Dashboard() {
             <div className="flex gap-4 items-start">
               <div className="flex flex-col items-center">
                 <Link href="/fund">
-                <Button
-                  className="px-6 py-5"
-                  variant="outline"
-                  onClick={fundWallet}
-                >
-                  Add Money
-                </Button>
+                  <Button
+                    className="px-6 py-5"
+                    variant="outline"
+                    onClick={fundWallet}
+                  >
+                    Add Money
+                  </Button>
                 </Link>
                 {/* <button
                   onClick={fundWallet}
@@ -183,7 +226,7 @@ export default function Dashboard() {
                   or fund on testnet
                 </button> */}
               </div>
-              
+
               <Button
                 variant="outline"
                 className="px-6 py-5"
@@ -192,35 +235,43 @@ export default function Dashboard() {
                 Transfer Money
               </Button>
               <Link href="/withdraw">
-              <Button
+                <Button
                   className="px-6 py-5"
                   variant="outline"
                 >
                   Withdraw Money
                 </Button>
-                </Link>
+              </Link>
             </div>
           </div>
         </Card>
         <div className="mt-6">
           <Card className="bg-background p-6 mt-6">
-            <CardHeader>
-              <CardTitle>Transaction History</CardTitle>
+            <CardHeader className="flex flex-row justify-between items-center">
+              <CardTitle className="text-xl font-semibold">Tranfe History</CardTitle>
+              <Button
+                onClick={() => setShowReceivals(!showReceivals)}
+                className=""
+              >
+                {showReceivals ? "Show Sent Transfers" : "Show Received Transfers"}
+              </Button>
             </CardHeader>
             <CardContent>
-              <Table>
+              <Table className="mt-4">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>To</TableHead>
+                    <TableHead>{showReceivals ? "From" : "To"}</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Time</TableHead>
                     <TableHead>Remarks</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
+                  {(showReceivals ? receivals : transactions).map((transaction) => (
                     <TableRow key={transaction.id}>
-                      <TableCell>{transaction.recipient}</TableCell>
+                      <TableCell>
+                        {showReceivals ? transaction.sendermail : transaction.recipient}
+                      </TableCell>
                       <TableCell>{transaction.amount} USD</TableCell>
                       <TableCell>{formatDate(transaction.timestamp)}</TableCell>
                       <TableCell>{transaction.remark}</TableCell>
